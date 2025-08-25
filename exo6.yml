@@ -1,0 +1,271 @@
+openapi: "3.0.3"
+info:
+  title: Users API
+  version: "1.0"
+servers:
+  - url: http://localhost:8000
+
+tags:
+  - name: Users
+    description: Manage user profiles
+
+components:
+  parameters:
+    UserIdParam:
+      name: id
+      in: path
+      required: true
+      description: Unique user identifier
+      schema:
+        type: string
+        example: "usr_001"
+
+  schemas:
+    PersonalInfo:
+      type: object
+      properties:
+        first_name:
+          type: string
+          example: "Tsiory"
+        last_name:
+          type: string
+          example: "Jonathan"
+        birthdate:
+          type: string
+          format: date
+          example: "2007-05-11"
+        email:
+          type: string
+          format: email
+          example: "jonathan@gmail.com"
+      required: [first_name, last_name, birthdate, email]
+
+    Address:
+      type: object
+      properties:
+        address_street:
+          type: string
+          example: "AV5 Ambohidroa"
+        address_city:
+          type: string
+          example: "Antananarivo"
+        address_country:
+          type: string
+          example: "MG"
+        address_postal_code:
+          type: string
+          example: "101"
+      required: [address_street, address_city, address_country, address_postal_code]
+
+    Preferences:
+      type: object
+      additionalProperties: false
+      properties:
+        needs_newsletter:
+          type: boolean
+          example: true
+        language:
+          type: string
+          enum: [mg, fr, eng]
+          example: fr
+      required: [needs_newsletter, language]
+
+    CreateUserProfile:
+      allOf:
+        - $ref: "#/components/schemas/PersonalInfo"
+        - $ref: "#/components/schemas/Address"
+        - $ref: "#/components/schemas/Preferences"
+
+    UserProfile:
+      allOf:
+        - $ref: "#/components/schemas/PersonalInfo"
+        - $ref: "#/components/schemas/Address"
+        - $ref: "#/components/schemas/Preferences"
+        - type: object
+          properties:
+            identifier:
+              type: string
+              example: "usr_0001"
+          required: [identifier]
+      description: Full user profile with server-generated identifier
+      example:
+        identifier: "usr_0001"
+        first_name: "Tsiory"
+        last_name: "Jonathan"
+        birthdate: "2007-07-10"
+        email: "jonathan@gmail.com"
+        address_street: "AV5 Ambohidroa"
+        address_city: "Antananarivo"
+        address_country: "MG"
+        address_postal_code: "101"
+        needs_newsletter: true
+        language: fr
+
+paths:
+  /users/{id}:
+    parameters:
+      - $ref: "#/components/parameters/UserIdParam"
+    get:
+      tags:
+        - Users
+      summary: Get a user with all information
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserProfile"
+  /users:
+    post:
+      tags: [Users]
+      summary: Create a list of users
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: "#/components/schemas/CreateUserProfile"
+            example:
+                  - first_name: "Ana"
+                    last_name: "Rakoto"
+                    birthdate: "2005-08-10"
+                    email: "ana@gmail.com"
+                    address_street: "Rue Jean Paul"
+                    address_city: "Toamasina"
+                    address_country: "MG"
+                    address_postal_code: "501"
+                    needs_newsletter: true
+                    language: fr
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/UserProfile"
+              example:
+                    - identifier: "usr_0001"
+                      first_name: "Ana"
+                      last_name: "Rakoto"
+                      birthdate: "2005-08-10"
+                      email: "ana@gmail.com"
+                      address_street: "Rue Jean Paul"
+                      address_city: "Toamasina"
+                      address_country: "MG"
+                      address_postal_code: "501"
+                      needs_newsletter: true
+                      language: fr
+
+  /users/{id}/personalInfo:
+    parameters:
+      - $ref: "#/components/parameters/UserIdParam"
+    put:
+      tags: [Users]
+      summary: Update only the personal information of a user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PersonalInfo"
+            example:
+              first_name: "Mickael"
+              last_name: "Nihasy"
+              birthdate: "2007-05-11"
+              email: "mickael@gmail.com"
+      responses:
+        "200":
+          description: Updated (returns full user profile)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserProfile"
+              example:
+                identifier: "usr_12345"
+                first_name: "Mickael"
+                last_name: "Nihasy"
+                birthdate: "2007-05-11"
+                email: "mickael@gmail.com"
+                address_street: "AV5 Ambohidroa"
+                address_city: "Antananarivo"
+                address_country: "MG"
+                address_postal_code: "101"
+                needs_newsletter: true
+                language: fr
+
+  /users/{id}/address:
+    parameters:
+      - $ref: "#/components/parameters/UserIdParam"
+    put:
+      tags: [Users]
+      summary: Update only the address of a user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Address"
+            example:
+              address_street: "Lot II K 12"
+              address_city: "Antananarivo"
+              address_country: "MG"
+              address_postal_code: "101"
+      responses:
+        "200":
+          description: Updated (returns full user profile)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserProfile"
+              example:
+                identifier: "usr_98765"
+                first_name: "Rina"
+                last_name: "Ando"
+                birthdate: "2006-01-20"
+                email: "rina@example.com"
+                address_street: "Lot II K 12"
+                address_city: "Antananarivo"
+                address_country: "MG"
+                address_postal_code: "101"
+                needs_newsletter: false
+                language: mg
+
+  /users/{id}/preferences:
+    parameters:
+      - $ref: "#/components/parameters/UserIdParam"
+    put:
+      tags: [Users]
+      summary: Update only the preferences of a user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Preferences"
+            example:
+                  needs_newsletter: true
+                  language: fr
+      responses:
+        "200":
+          description: Updated (returns full user profile)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserProfile"
+              example:
+                identifier: "usr_12345"
+                first_name: "Mickael"
+                last_name: "Nihasy"
+                birthdate: "2007-05-11"
+                email: "mickael@gmail.com"
+                address_street: "AV5 Ambohidroa"
+                address_city: "Antananarivo"
+                address_country: "MG"
+                address_postal_code: "101"
+                needs_newsletter: true
+                language: fr
