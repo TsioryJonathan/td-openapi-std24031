@@ -1,0 +1,120 @@
+openapi: "3.0.3"
+info:
+  title: Task Management API
+  version: "1.0"
+servers:
+  - url: http://localhost:8000
+
+paths:
+  /tasks:
+    get:
+      summary: Return a list of tasks or an empty list
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Task"
+
+    post:
+      summary: Create a new list of tasks given in the request body
+      requestBody:
+        required: true
+        description: A list of tasks to create
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: "#/components/schemas/Task"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Task"
+
+    delete:
+      summary: Delete a list of tasks given in the request body
+      requestBody:
+        required: true
+        description: A list of task IDs to delete
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                type: integer
+                example: 1
+      responses:
+        "200":
+          description: Deleted tasks
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Task"
+
+  /tasks/{id}:
+    summary: Do an operation on a specific task identified by its id
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+
+    get:
+      summary: Get a specific task by its id
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Task"
+        "404":
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                example:
+                  error: Task not found
+
+    delete:
+      summary: Delete a specific task by its id
+      responses:
+        "200":
+          description: Deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Task"
+
+components:
+  schemas:
+    Task:
+      type: object
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        completed:
+          type: boolean
+      required: [title]
+      example:
+        id: 1
+        title: "Do grocery shopping"
+        completed: false

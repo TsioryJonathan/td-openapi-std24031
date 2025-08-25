@@ -3,7 +3,7 @@ info:
   title: Ping API
   version: "1.0"
 servers:
-  - url: http://localhost:8080
+  - url: http://localhost:8000
 paths:
   /ping:
     get:
@@ -12,7 +12,6 @@ paths:
           description: OK
           content:
             text/plain:
-              schema: 
+              schema:
                 type: string
                 example: "pong"
-              
